@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weather Checker</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Times New Roman',Times,serif;background:linear-gradient(135deg,#87ceeb 0%,#dfefff 45%,#f7e6c4 100%);color:#2f3b4a;transition:all .5s ease;min-height:100vh;--accent:#87ceeb}
+.top{display:flex;justify-content:center;align-items:center;padding:18px 24px;gap:12px;position:relative;min-height:72px;background:rgba(255,255,255,.16);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.25)}
+.top h1{margin:0;text-align:center;font-size:32px;font-weight:800;color:#fff;text-shadow:0 3px 8px rgba(0,0,0,.25)}
+.top #date,.top #clock{position:absolute;color:#fff;font-weight:600;text-shadow:0 2px 6px rgba(0,0,0,.2)}
+.top #date{left:24px}
+.top #clock{right:24px}
+.container{max-width:980px;margin:0 auto;padding:24px;display:flex;justify-content:center}
+.card{width:100%;max-width:760px;background:rgba(255,255,255,.16);backdrop-filter:blur(14px);padding:24px;border-radius:24px;border:1px solid rgba(255,255,255,.28);box-shadow:0 14px 35px rgba(0,0,0,.16);position:relative}
+.card h3{font-weight:700;text-align:center;font-size:18px;margin:6px 0 4px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.18)}
+.controls{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin:14px 0 18px}
+select,button{padding:10px 14px;border-radius:999px;border:none;margin:5px;font-family:'Times New Roman',Times,serif;font-weight:700;box-shadow:0 6px 14px rgba(0,0,0,.08)}
+select{min-width:180px;background:#fff}
+button{background:linear-gradient(135deg,#ffffff,#f4f6ff);color:#2f3b4a;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease}
+button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.12)}
+#weather,#message{margin-top:20px;text-align:center}
+#weather{display:flex;justify-content:center}
+.weather-box{display:inline-block;padding:16px 20px;border-radius:18px;background:rgba(255,255,255,.22);box-shadow:0 8px 18px rgba(0,0,0,.12);width:min(100%,320px)}
+.weather-box h2,.weather-box h1,.weather-box p{margin:3px 0}
+.weather-box h2{font-size:22px}
+.weather-box h1{font-size:28px}
+.details-toggle{margin-top:10px;padding:8px 14px;border:none;border-radius:999px;background:#fff;color:#333;font-weight:700;cursor:pointer}
+.details-box{display:none;margin-top:10px;padding:10px;border-radius:12px;background:rgba(255,255,255,.22)}
+.sticky-section{position:fixed;left:20px;top:120px;display:flex;flex-direction:column;gap:10px;max-width:220px;z-index:10}
+.sticky-note-box{padding:12px;border-radius:16px;background:rgba(255,255,255,.24);backdrop-filter:blur(12px);box-shadow:0 10px 24px rgba(0,0,0,.14)}
+.sticky-note-box p{margin:0 0 8px 0;font-weight:700;color:#fff;text-align:center;font-size:15px;text-shadow:0 2px 6px rgba(0,0,0,.18)}
+.sticky-note-box textarea{width:100%;box-sizing:border-box;padding:10px;border:none;border-radius:10px;resize:vertical;font-family:'Times New Roman',Times,serif;font-weight:700;color:#000;margin-bottom:8px;background:#fff59d;min-height:72px;font-size:16px;line-height:1.4}
+.sticky-note-box textarea[data-color="pink"]{background:#f8c8dc}
+.sticky-note-box textarea[data-color="blue"]{background:#cfe8ff}
+.sticky-note-box textarea[data-color="green"]{background:#d8f5d0}
+.sticky-note-box .color-picker-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.sticky-note-box .color-pill{width:28px;height:28px;border-radius:50%;border:2px solid #fff;cursor:pointer;transition:transform .2s ease;padding:0}
+.sticky-note-box .color-pill:hover{transform:scale(1.08)}
+.sticky-note-box .color-pill.active{outline:2px solid #333}
+.sticky-note-box .color-pill.yellow{background:#fff59d}
+.sticky-note-box .color-pill.pink{background:#f8c8dc}
+.sticky-note-box .color-pill.blue{background:#cfe8ff}
+.sticky-note-box .color-pill.green{background:#d8f5d0}
+.sticky-note-box .add-note-btn{width:100%;padding:10px 12px;border:none;border-radius:999px;background:linear-gradient(135deg,#ffffff,#f4f6ff);color:#2f3b4a;font-weight:700;cursor:pointer;margin-bottom:6px;font-size:14px}
+.sticky-note-box .add-note-btn.secondary{background:linear-gradient(135deg,#2f4f4f,#456a6a);color:#fff}
+.sticky-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.sticky-item{width:100%;padding:10px 34px 10px 10px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.12);font-size:15px;white-space:pre-wrap;cursor:text;transition:transform .35s ease, opacity .35s ease;position:relative;font-family:'Times New Roman',Times,serif;color:#000;font-weight:700;border:1px solid rgba(0,0,0,.06);line-height:1.4;min-height:72px;height:auto;overflow-wrap:anywhere}
+.sticky-item[data-color="yellow"]{background:#fff59d}
+.sticky-item[data-color="pink"]{background:#f8c8dc}
+.sticky-item[data-color="blue"]{background:#cfe8ff}
+.sticky-item[data-color="green"]{background:#d8f5d0}
+.sticky-item small{display:block;margin-top:6px;color:#000;font-size:11px;font-family:'Times New Roman',Times,serif;font-weight:700}
+.sticky-note-text{outline:none;min-height:48px;height:auto;overflow-wrap:anywhere;white-space:pre-wrap}
+.sticky-menu-button{position:absolute;top:6px;right:6px;border:none;background:rgba(0,0,0,.12);color:#333;border-radius:50%;width:24px;height:24px;cursor:pointer;display:grid;place-items:center;font-size:14px;line-height:1;padding:0}
+.sticky-menu-button:hover{background:rgba(0,0,0,.2)}
+.sticky-note-menu{position:absolute;top:32px;right:6px;display:none;flex-direction:column;gap:4px;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;box-shadow:0 8px 18px rgba(0,0,0,.12);padding:6px;min-width:110px;z-index:5}
+.sticky-note-menu.show{display:flex}
+.sticky-note-menu button{margin:0;padding:7px 8px;border-radius:8px;border:none;background:#f6f6f6;color:#333;font-size:12px;text-align:left;box-shadow:none}
+.sticky-note-menu button:hover{background:#ececec}
+.sticky-item.removing{transform:translateX(-220px);opacity:0}
+.color-ring-wrap{display:flex;align-items:center;justify-content:flex-end;gap:10px;position:absolute;top:15px;right:15px}
+.ring-picker{position:relative;width:56px;height:56px;border-radius:50%;padding:4px;display:grid;place-items:center;background:conic-gradient(from 90deg,#ff4d6d,#ff9f1c,#ffd166,#06d6a0,#118ab2,#7b2cbf,#ff4d6d);box-shadow:0 8px 20px rgba(0,0,0,.25);cursor:pointer;transition:transform .2s ease}
+.ring-picker:hover{transform:scale(1.06)}
+.ring-picker input[type="color"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ring-core{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:18px;font-weight:bold}
+.ring-label{font-size:14px;color:#fff;opacity:.95}
+@media (max-width:960px){
+  .top{padding:16px 18px;min-height:auto;flex-wrap:wrap;gap:8px}
+  .top h1{font-size:clamp(24px,4vw,32px);width:100%}
+  .top #date,.top #clock{position:static;order:2}
+  .container{flex-direction:column;align-items:center;padding:16px}
+  .card{padding:20px}
+  .sticky-section{position:static;max-width:none;order:2;margin-top:20px;width:100%;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+}
+@media (max-width:768px){
+  .container{padding:12px}
+  .card{padding:16px;border-radius:18px}
+  .controls{flex-direction:column;align-items:stretch}
+  select,button{width:100%;margin:4px 0;min-width:0}
+  .weather-box{width:100%;max-width:100%}
+  .weather-box h2{font-size:20px}
+  .weather-box h1{font-size:24px}
+  .color-ring-wrap{position:static;justify-content:center;margin-bottom:8px}
+  .sticky-section{grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  body{font-size:15px}
+  .top{padding:14px 12px}
+  .card{padding:14px}
+  .sticky-note-box textarea{min-height:60px;font-size:14px}
+  .sticky-note-box p{font-size:14px}
+  .sticky-note-box .add-note-btn{font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="top">
+<h1>Weather Checker</h1>
+<div id="date"></div>
+<div id="clock"></div>
+</div>
+
+<div class="container">
+<div class="card">
+
+<div class="color-ring-wrap">
+  <span class="ring-label"></span>
+  <label class="ring-picker" for="ringColor">
+    <input id="ringColor" type="color" value="#87ceeb" onchange="changePageColor(this.value)">
+    <span class="ring-core"></span>
+  </label>
+</div>
+
+<h3 style="font-size:18px;font-weight:700;margin:6px 0 4px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.18);">Choose Your Hometown Area</h3>
+<!-- you can add your hometown option in the select box -->
+
+<div class="controls">
+<select id="city" onchange="getWeather()">
+<option value="">Select Location</option>
+<option>Vadodara</option>
+<option>Ahmedabad</option>
+<option>Surat</option>
+<option>Rajkot</option>
+<option>Gandhinagar</option>
+<option>Bhavnagar</option>
+<option>Jamnagar</option>
+<option>Junagadh</option>
+<option>Anand</option>
+<option>Nadiad</option>
+<option>Bharuch</option>
+<option>Navsari</option>
+<option>Valsad</option>
+<option>Porbandar</option>
+<option>Morbi</option>
+<option>Mehsana</option>
+<option>Palanpur</option>
+<option>Godhra</option>
+<option>Dahod</option>
+<option>Bhuj</option>
+<option>Dwarka</option>
+<option>Vapi</option>
+<option>Himmatnagar</option>
+<option>Deesa</option>
+</select>
+
+<button onclick="currentLocation()">📍 Current Location</button>
+</div>
+
+<div id="weather"></div>
+<div id="message"></div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// Add your WeatherAPI key below
+const API_KEY="YOUR_API_KEY_HERE";
+<!-- you have to add your api key here -->
+const msgs=[
+"Perfect weather for today!",
+"Enjoy your day outdoors.",
+"Stay hydrated and take care.",
+"Have an amazing day ahead!"
+];
+
+function randomMsg(){
+return msgs[Math.floor(Math.random()*msgs.length)];
+}
+
+setInterval(()=>{
+const now=new Date();
+document.getElementById("clock").innerText=now.toLocaleTimeString();
+document.getElementById("date").innerText=now.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+},1000);
+
+function escapeHtml(text){
+return text.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+let selectedNoteColor='yellow';
+
+function setNoteColor(color){
+selectedNoteColor=color;
+document.querySelectorAll('.color-pill').forEach(btn=>btn.classList.toggle('active',btn.classList.contains(color)));
+const input=document.getElementById('noteInput');
+if(input){
+  input.dataset.color=color;
+  const colorMap={yellow:'#fff59d',pink:'#f8c8dc',blue:'#cfe8ff',green:'#d8f5d0'};
+  input.style.backgroundColor=colorMap[color]||'#fff59d';
+}
+}
+
+function renderNotes(){
+const list=document.getElementById("stickyList");
+const notes=JSON.parse(localStorage.getItem("weatherStickyNotes")||"[]");
+list.innerHTML=notes.length?notes.map((note)=>`
+<div class="sticky-item" data-color="${note.color||'yellow'}">
+  <button class="sticky-menu-button" type="button" onclick="event.stopPropagation(); toggleNoteMenu(${note.id});">⋯</button>
+  <div class="sticky-note-menu" id="noteMenu-${note.id}">
+    <button type="button" onclick="event.stopPropagation(); downloadNote(${note.id});">Download</button>
+    <button type="button" onclick="event.stopPropagation(); removeNote(${note.id});">Remove</button>
+  </div>
+  <div class="sticky-note-text" contenteditable="true" onblur="updateNote(${note.id}, this.innerText)">${escapeHtml(note.text)}</div>
+</div>`).join("") : '';
+}
+
+function updateNote(id, text){
+const notes=JSON.parse(localStorage.getItem("weatherStickyNotes")||"[]");
+const updated=notes.map(note=>note.id===id?{...note,text:text.trim()||note.text,createdAt:note.createdAt}:note);
+localStorage.setItem("weatherStickyNotes", JSON.stringify(updated));
+renderNotes();
+}
+
+function toggleNoteMenu(id){
+const menu=document.getElementById(`noteMenu-${id}`);
+if(!menu) return;
+document.querySelectorAll('.sticky-note-menu').forEach(item=>{
+  if(item!==menu) item.classList.remove('show');
+});
+menu.classList.toggle('show');
+}
+
+function downloadNote(id){
+const notes=JSON.parse(localStorage.getItem("weatherStickyNotes")||"[]");
+const note=notes.find(item=>item.id===id);
+if(!note) return;
+const content=note.text || 'Empty note';
+const blob=new Blob([content],{type:'text/plain;charset=utf-8'});
+const url=URL.createObjectURL(blob);
+const link=document.createElement('a');
+link.href=url;
+link.download=`sticky-note-${id}.txt`;
+document.body.appendChild(link);
+link.click();
+link.remove();
+URL.revokeObjectURL(url);
+}
+
+function addNote(text="New note", color=selectedNoteColor){
+const notes=JSON.parse(localStorage.getItem("weatherStickyNotes")||"[]");
+notes.unshift({id:Date.now(),text:(text||"").trim()||"New note",color,createdAt:new Date().toLocaleString()});
+localStorage.setItem("weatherStickyNotes", JSON.stringify(notes.slice(0,6)));
+renderNotes();
+}
+
+function saveNoteFromInput(){
+const input=document.getElementById("noteInput");
+if(!input||!input.value.trim()) return;
+addNote(input.value, selectedNoteColor);
+input.value="";
+}
+
+setNoteColor('yellow');
+
+function saveNotesToPdf(){
+const notes=JSON.parse(localStorage.getItem("weatherStickyNotes")||"[]");
+if(!window.jspdf){
+  alert("PDF library could not be loaded. Please try again.");
+  return;
+}
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF({ unit: "pt", format: "a4" });
+const pageWidth = doc.internal.pageSize.getWidth();
+const pageHeight = doc.internal.pageSize.getHeight();
+const margin = 36;
+const contentWidth = pageWidth - margin * 2;
+const boxWidth = Math.min(contentWidth * 0.82, 320);
+const boxX = margin + (contentWidth - boxWidth) / 2;
+const colorMap = {
+  yellow: [255, 245, 157],
+  pink: [248, 200, 220],
+  blue: [207, 232, 255],
+  green: [216, 245, 208]
+};
+
+let y = 50;
+doc.setFont("helvetica", "bold");
+doc.setFontSize(20);
+doc.text("Weather Sticky Notes", margin, y);
+y += 24;
+doc.setFont("helvetica", "normal");
+doc.setFontSize(10);
+doc.setTextColor(90, 90, 90);
+doc.text(`Generated on ${new Date().toLocaleString()}`, margin, y);
+y += 24;
+doc.setTextColor(0, 0, 0);
+
+if(!notes.length){
+  doc.setFontSize(12);
+  doc.text("No notes yet.", margin, y);
+  doc.save("sticky-notes.pdf");
+  return;
+}
+
+notes.forEach((note) => {
+  const text = note.text || "Empty note";
+  const [r, g, b] = colorMap[note.color] || colorMap.yellow;
+  const lines = doc.splitTextToSize(text, boxWidth - 28);
+  const boxHeight = Math.max(92, 28 + lines.length * 13 + 24);
+
+  if(y + boxHeight > pageHeight - margin){
+    doc.addPage();
+    y = 50;
+  }
+
+  doc.setFillColor(r, g, b);
+  doc.setDrawColor(120, 120, 120);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(boxX, y, boxWidth, boxHeight, 8, 8, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text(lines, boxX + 14, y + 22);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(80, 80, 80);
+  doc.text(`Created: ${note.createdAt || "Unknown"}`, boxX + 14, y + boxHeight - 12);
+  doc.setTextColor(0, 0, 0);
+  y += boxHeight + 16;
+});
+
+doc.save("sticky-notes.pdf");
+}
+
+function removeNote(id){
+const notes=JSON.parse(localStorage.getItem("weatherStickyNotes")||"[]");
+const updated=notes.filter(note=>note.id!==id);
+localStorage.setItem("weatherStickyNotes", JSON.stringify(updated));
+renderNotes();
+}
+
+document.addEventListener('click',()=>{
+  document.querySelectorAll('.sticky-note-menu').forEach(menu=>menu.classList.remove('show'));
+});
+
+function clearNotes(){
+const list=document.getElementById("stickyList");
+const items=list.querySelectorAll(".sticky-item");
+items.forEach((item,index)=>{
+item.classList.add("removing");
+setTimeout(()=>item.remove(),300+index*50);
+});
+setTimeout(()=>{
+localStorage.removeItem("weatherStickyNotes");
+renderNotes();
+},500);
+}
+
+function changePageColor(value){
+document.body.style.background=value;
+document.body.style.setProperty("--accent", value);
+}
+
+function toggleDetails(){
+const box=document.getElementById("detailsBox");
+if(box){
+box.style.display=box.style.display==="block"?"none":"block";
+}
+}
+
+function applyTheme(condition,isDay){
+condition=condition.toLowerCase();
+
+if(!isDay){
+document.body.style.background="#0f172a";
+}else if(condition.includes("rain")){
+document.body.style.background="#475569";
+}else if(condition.includes("cloud")){
+document.body.style.background="#94a3b8";
+}else{
+document.body.style.background="#87ceeb";
+}
+}
+
+function render(data){
+let name=data.location.name;
+if(name==="Sauli") name="Savli";
+
+applyTheme(data.current.condition.text,data.current.is_day===1);
+
+document.getElementById("weather").innerHTML=`
+<div class="weather-box">
+  <h2>${name}</h2>
+  <h1>${data.current.temp_c}°C</h1>
+  <button class="details-toggle" onclick="toggleDetails()">More Details</button>
+  <div class="details-box" id="detailsBox">
+    <p>Condition: ${data.current.condition.text}</p>
+    <p>Humidity: ${data.current.humidity}%</p>
+    <p>Wind: ${data.current.wind_kph} km/h</p>
+    <p>Local Time: ${data.location.localtime}</p>
+  </div>
+</div>
+`;
+
+document.getElementById("message").innerHTML="<h3>"+randomMsg()+"</h3>";
+}
+
+async function getWeather(){
+const city=document.getElementById("city").value;
+if(!city)return;
+const r=await fetch(`https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}`);
+render(await r.json());
+}
+
+function currentLocation(){
+navigator.geolocation.getCurrentPosition(async p=>{
+const r=await fetch(`https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${p.coords.latitude},${p.coords.longitude}`);
+render(await r.json());
+});
+}
+
+renderNotes();
+</script>
+</body>
+</html>
