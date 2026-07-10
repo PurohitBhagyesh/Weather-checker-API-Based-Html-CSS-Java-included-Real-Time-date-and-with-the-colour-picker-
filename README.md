@@ -1,0 +1,2 @@
+# Weather-checker-API-Based-Html-CSS-Java-included-Real-Time-date-and-with-the-colour-picker-
+Weather Checker is a responsive web application developed using HTML, CSS, and JavaScript. It uses a Weather API to provide real-time weather updates, including temperature, humidity, wind speed, and weather conditions. The project also features a live date and time display, GPS location detection, and a customizable color picker theme.
