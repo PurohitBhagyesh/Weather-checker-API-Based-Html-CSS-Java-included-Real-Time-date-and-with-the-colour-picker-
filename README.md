@@ -25,6 +25,7 @@ Technologies Used
 * JavaScript (ES6)
 * Weather API
 * Geolocation API
+  if you want to check the website visit: https://app.netlify.com/projects/styleweather/
 
 Project Objective
 
