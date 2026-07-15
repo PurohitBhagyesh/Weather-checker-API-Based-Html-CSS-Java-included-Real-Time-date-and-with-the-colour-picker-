@@ -25,8 +25,9 @@ Technologies Used
 * JavaScript (ES6)
 * Weather API
 * Geolocation API
-  if you want to check the website visit: https://app.netlify.com/projects/styleweather/
 
 Project Objective
 
 The objective of this project is to provide users with accurate weather information in a simple and visually appealing interface while demonstrating API integration, responsive web design, and JavaScript-based dynamic content management.
+
+if you want to check the website visit: https://app.netlify.com/projects/styleweather/
